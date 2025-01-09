@@ -1,0 +1,16 @@
+Four Queen problem:
+
+The 4 Queens Problem consists in placing four queens on a 4 x 4 chessboard so that no two queens attack each other.
+That is, no two queens are allowed to be placed on the same row, the same column or the same diagonal.
+
+Solution :
+   MySol: Firstly I noticed the trick to the problem is knight move which is in shape of alphabetical letter "L",
+   then after placing queen on the board and another queen on knight move we get two queens, similarly all four queen can be placed.
+  
+  [  | Q|  |  ]
+  [  |  |  | Q]
+  [ Q|  |  |  ]
+  [  |  | Q|  ]
+  
+   OriginalSol: 
+

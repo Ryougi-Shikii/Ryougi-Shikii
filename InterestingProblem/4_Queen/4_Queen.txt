@@ -12,5 +12,5 @@ Solution :
   [ Q|  |  |  ]
   [  |  | Q|  ]
   
-   OriginalSol: 
+   OriginalSol: File uploaded in same folder
 

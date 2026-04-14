@@ -1,0 +1,19 @@
+
+CREATE TABLE EMPLOYEE (
+    empNO int,
+    empName varchar(15),
+    Job varchar(10),
+    MGR int,
+    HIREDATE varchar(10),
+    SAL int,
+    COMM int,
+    DEPTNO int
+);
+
+
+INSERT INTO EMPLOYEE(empId,name,Job,MGR,HIREDATE,SAL,COMM,DEPTNO) VALUES (7369,'SMITH','CLERK',7902,'17-DEC-80');
+
+
+SELECT * FROM EMPLOYEE;
+
+

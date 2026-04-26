@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RailBook — Railway Reservation System</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  /* ── Reset & Tokens ─────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #f0f4f8;
+    --surface:  #ffffff;
+    --card:     #ffffff;
+    --border:   #dde3ec;
+    --border-light: #eef1f6;
+    --accent:   #1a56db;
+    --accent2:  #1344b8;
+    --accent-glow: rgba(26, 86, 219, 0.12);
+    --blue:     #3b82f6;
+    --green:    #059669;
+    --green-bg: #ecfdf5;
+    --red:      #dc2626;
+    --red-bg:   #fef2f2;
+    --amber:    #d97706;
+    --amber-bg: #fffbeb;
+    --muted:    #94a3b8;
+    --text:     #0f172a;
+    --sub:      #64748b;
+    --font-h:   'Playfair Display', serif;
+    --font-b:   'DM Sans', sans-serif;
+    --radius:   14px;
+    --radius-sm: 8px;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow:   0 2px 8px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.04);
+    --shadow-md: 0 6px 24px rgba(15,23,42,0.10), 0 2px 6px rgba(15,23,42,0.06);
+    --shadow-accent: 0 4px 16px rgba(26,86,219,0.22);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(26,86,219,0.07) 0%, transparent 60%);
+    color: var(--text);
+    font-family: var(--font-b);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Scrollbar ──────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c8d0dc; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+
+  /* ── Header ─────────────────────────────────────────── */
+  header {
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-light);
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 0 var(--border-light), 0 2px 12px rgba(15,23,42,0.05);
+  }
+  .header-inner {
+    max-width: 1060px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px;
+  }
+  .logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+  .logo-icon {
+    font-size: 0;
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), #3b6fe8);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-accent);
+    flex-shrink: 0;
+  }
+  .logo-icon::after { content: "🚂"; font-size: 20px; }
+  .logo-name {
+    font-family: var(--font-h);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.3px;
+    line-height: 1.1;
+  }
+  .logo-sub {
+    font-size: 9.5px;
+    color: var(--muted);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 1px;
+  }
+  .user-bar { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .user-name { color: var(--text); font-weight: 600; font-size: 13px; }
+  .user-email { color: var(--sub); font-size: 11px; }
+
+  /* ── Nav Tabs ───────────────────────────────────────── */
+  .nav-tabs {
+    max-width: 1060px; margin: 0 auto;
+    display: flex; padding: 0 28px;
+    gap: 2px;
+  }
+  .nav-tab {
+    padding: 11px 18px;
+    background: none; border: none;
+    border-bottom: 2.5px solid transparent;
+    color: var(--sub);
+    cursor: pointer;
+    font-family: var(--font-b);
+    font-size: 13px;
+    font-weight: 500;
+    transition: color .18s, border-color .18s, background .18s;
+    border-radius: 6px 6px 0 0;
+    position: relative;
+    letter-spacing: 0.1px;
+  }
+  .nav-tab:hover:not(.active) {
+    color: var(--text);
+    background: rgba(15,23,42,0.03);
+  }
+  .nav-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── Main ───────────────────────────────────────────── */
+  main { max-width: 1060px; margin: 0 auto; padding: 36px 28px; }
+
+  /* ── Pages ──────────────────────────────────────────── */
+  .page { display: none; animation: fadeIn .28s cubic-bezier(0.22,1,0.36,1); }
+  .page.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Section Title ──────────────────────────────────── */
+  .section-title {
+    font-family: var(--font-h);
+    font-size: 23px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 22px;
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-light);
+    letter-spacing: -0.3px;
+  }
+  .section-title span { font-size: 22px; }
+
+  /* ── Card ───────────────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: box-shadow .2s;
+  }
+  .card + .card, .card + .train-card { margin-top: 14px; }
+
+  /* ── Search Box ─────────────────────────────────────── */
+  .search-box {
+    background: linear-gradient(145deg, #fff 0%, #f8fafc 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 24px;
+  }
+
+  /* ── Form elements ──────────────────────────────────── */
+  .field { margin-bottom: 18px; }
+  .field label {
+    display: block;
+    font-size: 10.5px;
+    color: var(--sub);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+    font-weight: 700;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 11px 15px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: #fafbfd;
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 14px;
+    font-weight: 400;
+    transition: border-color .18s, box-shadow .18s, background .18s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 3.5px var(--accent-glow);
+  }
+  .field input::placeholder { color: #b0bac9; font-weight: 400; }
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+    cursor: pointer;
+  }
+
+  /* ── Buttons ────────────────────────────────────────── */
+  .btn {
+    padding: 11px 22px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-b);
+    font-size: 13.5px;
+    font-weight: 600;
+    transition: transform .15s, box-shadow .15s, filter .15s, background .15s;
+    letter-spacing: 0.1px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent) 0%, #2563eb 100%);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(26,86,219,0.28);
+  }
+  .btn-primary:hover {
+    box-shadow: var(--shadow-accent);
+    filter: brightness(1.06);
+  }
+  .btn-ghost {
+    background: #fff;
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow-xs);
+  }
+  .btn-ghost:hover { background: var(--bg); border-color: #c0cad8; }
+  .btn-danger  { background: var(--red-bg);   color: var(--red);   border: 1.5px solid #fecaca; }
+  .btn-danger:hover { background: #fee2e2; }
+  .btn-success { background: var(--green-bg); color: var(--green); border: 1.5px solid #a7f3d0; }
+  .btn-success:hover { background: #d1fae5; }
+  .btn-full { width: 100%; justify-content: center; }
+  .btn-sm { padding: 7px 14px; font-size: 12px; }
+
+  /* ── Badge ──────────────────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-red   { background: #fee2e2; color: #991b1b; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-blue  { background: #dbeafe; color: #1e40af; }
+
+  /* ── Train Cards ────────────────────────────────────── */
+  .train-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+    transition: box-shadow .2s, border-color .2s, transform .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .train-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: linear-gradient(180deg, var(--accent), #60a5fa);
+    border-radius: 2px 0 0 2px;
+  }
+  .train-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: #c8d3e8;
+    transform: translateY(-1px);
+  }
+  .train-name { font-weight: 700; font-size: 17px; color: var(--text); letter-spacing: -0.2px; }
+  .train-no   { color: var(--sub); font-size: 12px; font-weight: 500; }
+  .time-big   { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.8px; font-family: var(--font-h); }
+  .sta-name   { font-size: 11.5px; color: var(--sub); font-weight: 500; margin-top: 2px; }
+
+  .class-cell {
+    flex: 1; min-width: 90px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .18s, background .18s, box-shadow .18s, transform .18s;
+  }
+  .class-cell:hover {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+  .class-name  { font-size: 11px; font-weight: 800; color: var(--text); letter-spacing: 0.5px; }
+  .class-price { font-size: 13px; font-weight: 700; color: var(--accent); margin: 2px 0; }
+  .class-avail { font-size: 11px; margin: 3px 0; font-weight: 600; }
+  .avail-ok    { color: var(--green); }
+  .avail-low   { color: var(--amber); }
+
+  /* ── Booking & PNR ──────────────────────────────────── */
+  .pax-block {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 12px;
+    transition: border-color .18s;
+  }
+  .pax-block:hover { border-color: #c8d3e8; }
+
+  .fare-summary {
+    background: linear-gradient(135deg, #f0f6ff 0%, #eef2ff 100%);
+    border: 1.5px solid #c7d9f5;
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .pay-btn {
+    flex: 1; padding: 13px 10px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    color: var(--sub);
+    cursor: pointer;
+    font-family: var(--font-b);
+    font-weight: 600;
+    font-size: 13px;
+    transition: all .2s;
+  }
+  .pay-btn.selected {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #eff6ff;
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
+  .pay-btn:hover:not(.selected) { border-color: #c8d3e8; background: var(--bg); }
+
+  .ticket-box {
+    background: repeating-linear-gradient(
+      -45deg, #f8fafc, #f8fafc 10px, #fff 10px, #fff 20px
+    );
+    border: 2px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 24px;
+    text-align: left;
+    position: relative;
+  }
+
+  /* ── Admin Dashboard ────────────────────────────────── */
+  .stat-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: box-shadow .2s, transform .2s;
+  }
+  .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .stat-icon { font-size: 28px; margin-bottom: 10px; }
+  .stat-num  { font-size: 30px; font-weight: 800; letter-spacing: -1px; font-family: var(--font-h); }
+  .stat-label {
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 700;
+    font-size: 10px;
+    color: var(--sub);
+    margin-top: 4px;
+  }
+
+  .occ-bar-wrap { height: 5px; background: var(--border-light); border-radius: 10px; overflow: hidden; margin-top: 6px; }
+  .occ-bar { height: 100%; border-radius: 10px; transition: width .6s ease; }
+
+  /* ── Nav Tabs (final) ───────────────────────────────── */
+  .nav-tab { padding: 11px 18px; }
+
+  /* ── PNR Input ──────────────────────────────────────── */
+  .pnr-search {
+    display: flex;
+    gap: 10px;
+    background: var(--bg);
+    padding: 7px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border);
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .pnr-search:focus-within {
+    box-shadow: 0 0 0 3.5px var(--accent-glow);
+    border-color: var(--accent);
+    background: #fff;
+  }
+  .pnr-search input {
+    flex: 1;
+    padding: 11px 20px;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 15px;
+    letter-spacing: 3px;
+    font-weight: 600;
+    box-shadow: none !important;
+  }
+  .pnr-search input::placeholder {
+    letter-spacing: normal;
+    font-weight: 400;
+    font-size: 14px;
+    color: #b0bac9;
+  }
+  .pnr-search .btn-primary {
+    border-radius: 50px;
+    padding: 0 28px;
+  }
+
+  /* ── Auth ───────────────────────────────────────────── */
+  .auth-wrap {
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .auth-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 24px;
+    gap: 4px;
+  }
+  .auth-tab {
+    flex: 1; padding: 10px;
+    background: none; border: none;
+    border-bottom: 2.5px solid transparent;
+    cursor: pointer;
+    font-family: var(--font-b);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sub);
+    transition: color .18s, border-color .18s;
+    margin-bottom: -1px;
+  }
+  .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .demo-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 14px;
+    padding: 10px;
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+  }
+
+  /* ── Section Title (final) ──────────────────────────── */
+  .section-title {
+    font-family: var(--font-h); font-size: 23px; font-weight: 800;
+    color: var(--text); margin-bottom: 22px;
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-light);
+    letter-spacing: -0.3px;
+  }
+
+  /* ── Booking Card ───────────────────────────────────── */
+  .booking-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    transition: box-shadow .2s;
+  }
+  .booking-card:hover { box-shadow: var(--shadow-md); }
+  .bk-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .bk-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+  .bk-meta { font-size: 12.5px; color: var(--sub); margin-top: 4px; }
+  .pax-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-light); }
+  .pax-chip { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 11.5px; color: var(--sub); font-weight: 500; }
+
+  /* ── Info Grid ──────────────────────────────────────── */
+  .info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 16px; }
+  .info-cell { background: var(--bg); border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border-light); }
+  .info-key { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 700; }
+  .info-val { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 3px; }
+
+  /* ── Toast ──────────────────────────────────────────── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--text); color: #fff;
+    padding: 12px 22px; border-radius: 100px;
+    font-size: 13.5px; font-weight: 500;
+    box-shadow: 0 8px 32px rgba(15,23,42,0.2);
+    opacity: 0; transition: transform .3s cubic-bezier(0.22,1,0.36,1), opacity .3s;
+    z-index: 999; white-space: nowrap;
+    max-width: calc(100vw - 48px);
+    pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { background: linear-gradient(135deg, #059669, #10b981); }
+  #toast.error   { background: linear-gradient(135deg, #dc2626, #ef4444); }
+  #toast.info    { background: linear-gradient(135deg, var(--accent), #3b82f6); }
+
+  /* ── Spinner ────────────────────────────────────────── */
+  .spinner {
+    width: 24px; height: 24px;
+    border: 2.5px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Empty State ────────────────────────────────────── */
+  .empty {
+    padding: 36px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* ── Grid utilities ─────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+  @media (max-width: 680px) {
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr 1fr; }
+    .stat-grid { grid-template-columns: 1fr !important; }
+  }
+  .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
+
+  /* ── Misc utilities ─────────────────────────────────── */
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .bold { font-weight: 700; }
+  .accent { color: var(--accent); }
+  .mt-8  { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+  .divider { border: none; border-top: 1px solid var(--border-light); margin: 16px 0; }
+
+  /* ── Train route line ───────────────────────────────── */
+  .route-line {
+    flex: 1;
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 12px;
+  }
+  .route-dot {
+    width: 7px; height: 7px;
+    background: var(--accent); border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .route-dash {
+    flex: 1; height: 1.5px;
+    background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 6px, transparent 6px, transparent 12px);
+    opacity: 0.35;
+  }
+  .duration-tag {
+    font-size: 11px;
+    color: var(--sub);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 10px;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Toast ──────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ── Header ─────────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🚂</div>
+      <div>
+        <div class="logo-name">RailBook</div>
+        <div class="logo-sub">Railway Reservation System</div>
+      </div>
+    </div>
+    <div class="user-bar" id="userBar">
+      <div id="userInfo" style="display:none; text-align:right;">
+        <div class="user-name" id="headerName"></div>
+        <div class="user-email" id="headerEmail"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn" style="display:none;" onclick="handleLogout()">Logout</button>
+    </div>
+  </div>
+  <nav class="nav-tabs" id="navTabs">
+    <button class="nav-tab active" data-page="search" onclick="switchPage('search')">🔍 Search</button>
+    <button class="nav-tab" data-page="bookings" onclick="switchPage('bookings')">🎫 My Bookings</button>
+    <button class="nav-tab" data-page="pnr" onclick="switchPage('pnr')">📋 PNR Status</button>
+    <button class="nav-tab" data-page="admin" onclick="switchPage('admin')">⚙️ Admin</button>
+  </nav>
+</header>
+
+<!-- ── Main ───────────────────────────────────────────────── -->
+<main>
+
+  <!-- ── SEARCH PAGE ──────────────────────────────────────── -->
+  <div class="page active" id="page-search">
+    <div class="section-title"><span>🔍</span> Search Trains</div>
+    <div class="card search-box">
+      <div class="grid-4">
+        <div class="field">
+          <label>From *</label>
+          <select id="srcStation">
+            <option value="">— Select —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>To *</label>
+          <select id="dstStation">
+            <option value="">— Select —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Journey Date *</label>
+          <input type="date" id="journeyDate"/>
+        </div>
+        <div class="field">
+          <label>Class</label>
+          <select id="filterClass">
+            <option value="">All Classes</option>
+            <option>1AC</option><option>2AC</option><option>3AC</option>
+            <option>SL</option><option>GEN</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="searchTrains()">Search Trains</button>
+    </div>
+    <div id="searchResults"></div>
+  </div>
+
+  <!-- ── BOOKING PAGE ─────────────────────────────────────── -->
+  <div class="page" id="page-booking">
+    <div class="section-title"><span>🎫</span> Book Ticket</div>
+    <div id="bookingContent"></div>
+  </div>
+
+  <!-- ── MY BOOKINGS PAGE ─────────────────────────────────── -->
+  <div class="page" id="page-bookings">
+    <div class="section-title"><span>🎫</span> My Bookings</div>
+    <div id="myBookingsList"><div class="empty">Loading...</div></div>
+  </div>
+
+  <!-- ── PNR PAGE ──────────────────────────────────────────── -->
+  <div class="page" id="page-pnr">
+    <div class="section-title"><span>📋</span> PNR Status</div>
+    <div class="card">
+      <div class="pnr-search">
+        <input type="text" id="pnrInput" placeholder="Enter 10-digit PNR number" maxlength="10"/>
+        <button class="btn btn-primary" onclick="checkPNR()">Check Status</button>
+      </div>
+    </div>
+    <div id="pnrResult" class="mt-16"></div>
+  </div>
+
+  <!-- ── ADMIN PAGE ────────────────────────────────────────── -->
+  <div class="page" id="page-admin">
+    <div class="section-title"><span>⚙️</span> Admin Dashboard</div>
+    <div id="adminContent"><div class="empty">Loading...</div></div>
+  </div>
+
+  <!-- ── AUTH PAGE ────────────────────────────────────────── -->
+  <div class="page" id="page-auth">
+    <div class="auth-wrap">
+      <div class="card">
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchAuth('login')">Login</button>
+          <button class="auth-tab" onclick="switchAuth('register')">Register</button>
+        </div>
+
+        <!-- Login form -->
+        <div id="loginForm">
+          <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="sumit@email.com"/></div>
+          <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
+          <button class="btn btn-primary btn-full" onclick="handleLogin()">Login</button>
+          <div class="demo-hint">Demo account is pre-seeded on first run.</div>
+        </div>
+
+        <!-- Register form -->
+        <div id="registerForm" style="display:none;">
+          <div class="grid-2">
+            <div class="field"><label>Full Name *</label><input type="text" id="regName" placeholder="Sumit Kumar"/></div>
+            <div class="field"><label>Phone *</label><input type="text" id="regPhone" placeholder="9876543210"/></div>
+          </div>
+          <div class="field"><label>Email *</label><input type="email" id="regEmail" placeholder="you@email.com"/></div>
+          <div class="field"><label>Password *</label><input type="password" id="regPass" placeholder="Min 6 characters"/></div>
+          <button class="btn btn-primary btn-full" onclick="handleRegister()">Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Firebase SDK ────────────────────────────────────────── -->
+<script type="module">
+import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+                                  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, updateDoc, orderBy }
+                                  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  REPLACE THIS WITH YOUR FIREBASE CONFIG                  ║
+// ╚══════════════════════════════════════════════════════════╝
+const firebaseConfig = {
+  apiKey: "AIzaSyBnf4t79jD39c9-n0FR49mP1nvQAjjzaik",
+  authDomain: "railwayreservation-6df6e.firebaseapp.com",
+  projectId: "railwayreservation-6df6e",
+  storageBucket: "railwayreservation-6df6e.firebasestorage.app",
+  messagingSenderId: "913824280913",
+  appId: "1:913824280913:web:05d68f6455136d82cda370",
+  measurementId: "G-MKREKB72RT"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// ── Constants ──────────────────────────────────────────────
+const STATIONS = [
+  "New Delhi","Mumbai Central","Kolkata","Bhopal","Bangalore",
+  "Patna","Amritsar","Chennai","Hyderabad","Ahmedabad","Jaipur","Lucknow"
+];
+const CLASSES  = ["1AC","2AC","3AC","SL","GEN"];
+const FARE_MAP = { "1AC":2800, "2AC":1800, "3AC":1100, "SL":450, "GEN":200 };
+const SEED_TRAINS = [
+  { train_no:"12301", train_name:"Rajdhani Express",    source:"New Delhi",     destination:"Mumbai Central", departure:"16:00", arrival:"08:15", seats:{"1AC":12,"2AC":24,"3AC":48,"SL":72,"GEN":100} },
+  { train_no:"12951", train_name:"Mumbai Rajdhani",     source:"Mumbai Central",destination:"New Delhi",       departure:"17:00", arrival:"09:25", seats:{"1AC":12,"2AC":24,"3AC":48,"SL":72,"GEN":100} },
+  { train_no:"12259", train_name:"Duronto Express",     source:"New Delhi",     destination:"Kolkata",         departure:"12:30", arrival:"06:00", seats:{"1AC":8,"2AC":20,"3AC":44,"SL":70,"GEN":90} },
+  { train_no:"12002", train_name:"Bhopal Shatabdi",     source:"New Delhi",     destination:"Bhopal",          departure:"06:00", arrival:"13:55", seats:{"1AC":16,"2AC":32,"3AC":0,"SL":0,"GEN":60} },
+  { train_no:"22691", train_name:"Rajdhani Express",    source:"Bangalore",     destination:"New Delhi",       departure:"20:00", arrival:"06:10", seats:{"1AC":12,"2AC":24,"3AC":48,"SL":72,"GEN":100} },
+  { train_no:"12627", train_name:"Karnataka Express",   source:"New Delhi",     destination:"Bangalore",       departure:"22:30", arrival:"05:00", seats:{"1AC":8,"2AC":20,"3AC":44,"SL":72,"GEN":100} },
+  { train_no:"12004", train_name:"New Delhi Shatabdi",  source:"New Delhi",     destination:"Amritsar",        departure:"07:20", arrival:"13:45", seats:{"1AC":16,"2AC":32,"3AC":0,"SL":0,"GEN":80} },
+  { train_no:"12381", train_name:"Poorva Express",      source:"New Delhi",     destination:"Kolkata",         departure:"08:00", arrival:"04:35", seats:{"1AC":8,"2AC":20,"3AC":44,"SL":72,"GEN":100} },
+];
+
+// ── App state ───────────────────────────────────────────────
+window._state = {
+  currentUser: null,
+  userProfile: null,
+  bookingData: { train:null, cls:"SL", passengers:[], payMode:"UPI", step:1 },
+};
+
+// ── Helpers ─────────────────────────────────────────────────
+window.toast = (msg, type="success") => {
+  const t = document.getElementById("toast");
+  t.textContent = (type==="success"?"✓ ":type==="error"?"✕ ":"ℹ ") + msg;
+  t.className = `show ${type}`;
+  setTimeout(()=>{ t.className=""; }, 3500);
+};
+
+window.switchPage = (name) => {
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("page-"+name).classList.add("active");
+  const tab = document.querySelector(`[data-page="${name}"]`);
+  if(tab) tab.classList.add("active");
+  if(name==="bookings") loadMyBookings();
+  if(name==="admin") loadAdmin();
+};
+
+window.switchAuth = (mode) => {
+  document.querySelectorAll(".auth-tab").forEach(t=>t.classList.remove("active"));
+  document.querySelector(`.auth-tab:${mode==="login"?"first":"last"}-child`).classList.add("active");
+  document.getElementById("loginForm").style.display    = mode==="login"?"block":"none";
+  document.getElementById("registerForm").style.display = mode==="register"?"block":"none";
+};
+
+function requireAuth(callback) {
+  if(!_state.currentUser){ switchPage("auth"); toast("Please login first.","info"); return false; }
+  callback(); return true;
+}
+
+function generatePNR() { return String(Math.floor(1000000000+Math.random()*9000000000)); }
+
+function fmtMoney(n){ return "₹"+Number(n).toLocaleString("en-IN"); }
+
+// ── Populate selects ────────────────────────────────────────
+function populateStations(){
+  const ids = ["srcStation","dstStation"];
+  ids.forEach(id=>{
+    const sel = document.getElementById(id);
+    STATIONS.forEach(s=>{ const o=document.createElement("option"); o.value=o.textContent=s; sel.appendChild(o); });
+  });
+  // Default journey date = tomorrow
+  const d = new Date(); d.setDate(d.getDate()+1);
+  document.getElementById("journeyDate").value = d.toISOString().slice(0,10);
+}
+
+// ── Seed trains ─────────────────────────────────────────────
+async function seedTrainsIfNeeded(){
+  try {
+    const snap = await getDocs(collection(db,"trains"));
+    if(!snap.empty) return;
+    for(const t of SEED_TRAINS){
+      await setDoc(doc(db,"trains",t.train_no), {
+        ...t,
+        available: { ...t.seats } // mutable available counts
+      });
+    }
+    console.log("Trains seeded.");
+  } catch(e){ console.warn("Seed skipped:",e.message); }
+}
+
+// ── Auth ─────────────────────────────────────────────────────
+window.handleLogin = async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass  = document.getElementById("loginPass").value;
+  if(!email||!pass){ toast("Fill in all fields.","error"); return; }
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e){
+    toast(e.code==="auth/user-not-found"||e.code==="auth/wrong-password"
+      ? "Invalid email or password." : e.message, "error");
+  }
+};
+
+window.handleRegister = async () => {
+  const name  = document.getElementById("regName").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const pass  = document.getElementById("regPass").value;
+  if(!name||!phone||!email||!pass){ toast("All fields are required.","error"); return; }
+  if(pass.length < 6){ toast("Password must be at least 6 characters.","error"); return; }
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await setDoc(doc(db,"users",cred.user.uid), { name, phone, email, createdAt: new Date().toISOString() });
+    toast("Account created! Welcome, "+name+"!");
+  } catch(e){
+    toast(e.code==="auth/email-already-in-use"?"Email already registered.":e.message,"error");
+  }
+};
+
+window.handleLogout = async () => {
+  await signOut(auth);
+  toast("Logged out.","info");
+  switchPage("search");
+};
+
+onAuthStateChanged(auth, async (user) => {
+  _state.currentUser = user;
+  const info = document.getElementById("userInfo");
+  const btn  = document.getElementById("logoutBtn");
+  if(user){
+    // Load profile
+    try {
+      const snap = await getDoc(doc(db,"users",user.uid));
+      _state.userProfile = snap.exists() ? snap.data() : { name: user.email, email: user.email };
+    } catch(e){ _state.userProfile = { name: user.email, email: user.email }; }
+    document.getElementById("headerName").textContent  = _state.userProfile.name;
+    document.getElementById("headerEmail").textContent = user.email;
+    info.style.display = "block"; btn.style.display = "block";
+    // If on auth page, redirect
+    if(document.getElementById("page-auth").classList.contains("active")) switchPage("search");
+  } else {
+    _state.userProfile = null;
+    info.style.display = "none"; btn.style.display = "none";
+  }
+});
+
+// ── Search trains ─────────────────────────────────────────────
+window.searchTrains = async () => {
+  const src   = document.getElementById("srcStation").value;
+  const dst   = document.getElementById("dstStation").value;
+  const date  = document.getElementById("journeyDate").value;
+  const cls   = document.getElementById("filterClass").value;
+  if(!src||!dst){ toast("Select source and destination.","error"); return; }
+  if(src===dst){ toast("Source and destination cannot be same.","error"); return; }
+  const div = document.getElementById("searchResults");
+  div.innerHTML = `<div class="empty"><div class="spinner"></div></div>`;
+  try {
+    let q = query(collection(db,"trains"), where("source","==",src), where("destination","==",dst));
+    const snap = await getDocs(q);
+    if(snap.empty){ div.innerHTML=`<div class="empty">No trains found for this route.</div>`; return; }
+    let html = `<p style="color:var(--sub);font-size:13px;margin-bottom:12px;">${snap.size} train(s) found for ${src} → ${dst} on ${date}</p>`;
+    snap.forEach(d=>{ html += renderTrainCard(d.data(), date, cls); });
+    div.innerHTML = html;
+    // Store date for booking
+    _state.bookingData.date = date;
+  } catch(e){ div.innerHTML=`<div class="empty">Error: ${e.message}</div>`; }
+};
+
+function availColor(n){ return n>10?"avail-ok":n>0?"avail-low":"avail-none"; }
+function availText(n){ return n>0?`${n} seats`:"Waitlist"; }
+
+function renderTrainCard(t, date, filterCls){
+  const clsArr = filterCls ? [filterCls] : CLASSES;
+  let clsCells = clsArr.map(c=>{
+    const avail = (t.available||{})[c] ?? 0;
+    const total = (t.seats||{})[c] ?? 0;
+    if(total===0) return "";
+    return `<div class="class-cell">
+      <div class="class-name">${c}</div>
+      <div class="class-avail ${availColor(avail)}">${availText(avail)}</div>
+      <div class="class-fare">${fmtMoney(FARE_MAP[c])}</div>
+      <button class="btn btn-sm btn-primary mt-8" style="width:100%"
+        ${avail===0?"disabled":""}
+        onclick="startBooking('${t.train_no}','${c}','${date}')">Book</button>
+    </div>`;
+  }).join("");
+  return `<div class="train-card">
+    <div class="train-head">
+      <div>
+        <div class="train-name">${t.train_name}</div>
+        <div class="train-no">#${t.train_no}</div>
+        <div class="route-row">
+          <div><div class="time-big">${t.departure}</div><div class="sta-name">${t.source}</div></div>
+          <div class="arrow">→</div>
+          <div><div class="time-big">${t.arrival}</div><div class="sta-name">${t.destination}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="classes-grid">${clsCells}</div>
+  </div>`;
+}
+
+// ── Booking flow ───────────────────────────────────────────────
+window.startBooking = async (trainNo, cls, date) => {
+  if(!requireAuth(()=>{})) return;
+  const snap = await getDoc(doc(db,"trains",trainNo));
+  if(!snap.exists()){ toast("Train not found.","error"); return; }
+  _state.bookingData = { train: snap.data(), cls, date, passengers:[{name:"",age:"",gender:"Male",berth:"LOWER"}], payMode:"UPI", step:1 };
+  switchPage("booking"); renderBookingStep();
+};
+
+function renderBookingStep(){
+  const { train, cls, date, passengers, payMode, step } = _state.bookingData;
+  const fare = FARE_MAP[cls] * passengers.length;
+  const tax  = Math.round(fare * 0.05);
+  const total = fare + tax;
+
+  if(step===1){
+    let paxHtml = passengers.map((p,i)=>`
+      <div class="pax-block">
+        <div class="pax-hd">
+          <span class="pax-label">Passenger ${i+1}</span>
+          ${i>0?`<button class="btn btn-danger btn-sm" onclick="removePax(${i})">Remove</button>`:""}
+        </div>
+        <div class="grid-4">
+          <div class="field" style="grid-column:span 2">
+            <label>Full Name *</label>
+            <input type="text" value="${p.name}" oninput="_state.bookingData.passengers[${i}].name=this.value" placeholder="Full Name"/>
+          </div>
+          <div class="field">
+            <label>Age *</label>
+            <input type="number" value="${p.age}" oninput="_state.bookingData.passengers[${i}].age=this.value" placeholder="25" min="1" max="120"/>
+          </div>
+          <div class="field">
+            <label>Gender</label>
+            <select onchange="_state.bookingData.passengers[${i}].gender=this.value">
+              ${["Male","Female","Other"].map(g=>`<option ${p.gender===g?"selected":""}>${g}</option>`).join("")}
+            </select>
+          </div>
+          <div class="field" style="grid-column:span 2">
+            <label>Berth Preference</label>
+            <select onchange="_state.bookingData.passengers[${i}].berth=this.value">
+              ${["LOWER","MIDDLE","UPPER","SIDE LOWER","SIDE UPPER"].map(b=>`<option ${p.berth===b?"selected":""}>${b}</option>`).join("")}
+            </select>
+          </div>
+        </div>
+      </div>`).join("");
+
+    document.getElementById("bookingContent").innerHTML = `
+      <div class="card" style="margin-bottom:14px; background:#1a2540;">
+        <div class="flex-between">
+          <div>
+            <div class="bold">${train.train_name} <span style="color:var(--sub);font-size:12px;">#${train.train_no}</span></div>
+            <div class="bk-meta">${train.source} → ${train.destination} &nbsp;|&nbsp; ${date}</div>
+          </div>
+          <div>
+            <span class="badge badge-amber">${cls}</span>
+            <div style="font-size:11px;color:var(--sub);margin-top:4px;text-align:right;">${(train.available||{})[cls]??0} seats left</div>
+          </div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step active">1. Passenger Details</div>
+        <div class="step">2. Payment</div>
+      </div>
+      <div class="card">
+        <div class="flex-between" style="margin-bottom:16px;">
+          <h3 style="color:var(--text);">Passengers</h3>
+          <button class="btn btn-ghost btn-sm" onclick="addPax()" ${passengers.length>=(( train.available||{})[cls]??0)?"disabled":""}>+ Add Passenger</button>
+        </div>
+        ${paxHtml}
+        <hr class="divider"/>
+        <div class="flex-between">
+          <div>Total: <span class="accent bold" style="font-size:18px;">${fmtMoney(total)}</span></div>
+          <button class="btn btn-primary" onclick="goToPayment()">Continue to Payment →</button>
+        </div>
+      </div>`;
+  }
+
+  if(step===2){
+    document.getElementById("bookingContent").innerHTML = `
+      <div class="steps">
+        <div class="step">1. Passenger Details</div>
+        <div class="step active">2. Payment</div>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--text);margin-bottom:16px;">Select Payment Method</h3>
+        <div class="pay-methods">
+          ${["UPI","CARD","NET_BANKING"].map(m=>`
+            <button class="pay-btn ${payMode===m?"selected":""}" onclick="selectPay('${m}')">
+              ${m==="NET_BANKING"?"Net Banking":m}
+            </button>`).join("")}
+        </div>
+        <div class="fare-summary">
+          <div class="fare-row"><span class="label">Base Fare (${passengers.length} × ${fmtMoney(FARE_MAP[cls])})</span><span>${fmtMoney(fare)}</span></div>
+          <div class="fare-row"><span class="label">Service Tax (5%)</span><span>${fmtMoney(tax)}</span></div>
+          <div class="fare-row total"><span>Total Payable</span><span class="accent">${fmtMoney(total)}</span></div>
+        </div>
+        <div class="flex-end">
+          <button class="btn btn-ghost" onclick="goBack()">← Back</button>
+          <button class="btn btn-primary" onclick="confirmPayment()">Pay ${fmtMoney(total)} via ${payMode}</button>
+        </div>
+      </div>`;
+  }
+}
+
+window.addPax    = () => { _state.bookingData.passengers.push({name:"",age:"",gender:"Male",berth:"LOWER"}); renderBookingStep(); };
+window.removePax = (i) => { _state.bookingData.passengers.splice(i,1); renderBookingStep(); };
+window.selectPay = (m) => { _state.bookingData.payMode=m; renderBookingStep(); };
+window.goBack    = () => { _state.bookingData.step=1; renderBookingStep(); };
+window.goToPayment = () => {
+  const { passengers } = _state.bookingData;
+  if(passengers.some(p=>!p.name.trim()||!p.age)){ toast("Fill in all passenger details.","error"); return; }
+  _state.bookingData.step=2; renderBookingStep();
+};
+
+window.confirmPayment = async () => {
+  const { train, cls, date, passengers, payMode } = _state.bookingData;
+  const fare  = FARE_MAP[cls]*passengers.length;
+  const tax   = Math.round(fare*0.05);
+  const total = fare+tax;
+  const pnr   = generatePNR();
+  const txn   = "TXN"+Math.random().toString(36).substr(2,8).toUpperCase();
+  const bkId  = "BK"+Date.now();
+
+  const booking = {
+    booking_id:   bkId,
+    pnr,
+    status:       "CONFIRMED",
+    user_id:      _state.currentUser.uid,
+    user_name:    _state.userProfile.name,
+    user_email:   _state.currentUser.email,
+    train_no:     train.train_no,
+    train_name:   train.train_name,
+    source:       train.source,
+    destination:  train.destination,
+    departure:    train.departure,
+    arrival:      train.arrival,
+    journey_date: date,
+    seat_class:   cls,
+    passengers:   passengers.map(p=>({...p, passenger_id:"P"+Date.now()+Math.random()})),
+    fare:         total,
+    base_fare:    fare,
+    tax,
+    payment: { payment_id:"PAY"+Date.now(), amount:total, mode:payMode, status:"SUCCESS", transaction_id:txn },
+    booking_date: new Date().toISOString().slice(0,10),
+    created_at:   new Date().toISOString(),
+  };
+
+  try {
+    // Save booking
+    await setDoc(doc(db,"bookings",bkId), booking);
+    // Decrement available seats
+    const avail = ((await getDoc(doc(db,"trains",train.train_no))).data()?.available)||{};
+    avail[cls] = Math.max(0,(avail[cls]??0)-passengers.length);
+    await updateDoc(doc(db,"trains",train.train_no), { available: avail });
+
+    toast("Booking Confirmed! PNR: "+pnr);
+    showConfirmScreen(booking);
+  } catch(e){ toast("Error: "+e.message,"error"); }
+};
+
+function showConfirmScreen(bk){
+  document.getElementById("bookingContent").innerHTML = `
+    <div class="card confirm-screen">
+      <div class="confirm-icon">✅</div>
+      <h2 style="color:var(--green);">Booking Confirmed!</h2>
+      <div class="confirm-pnr">${bk.pnr}</div>
+      <p style="color:var(--sub);font-size:13px;">Save this PNR number for future reference</p>
+      <div class="ticket-box">
+        <div class="ticket-row"><span class="ticket-label">Train</span><span class="bold">${bk.train_name} (#${bk.train_no})</span></div>
+        <div class="ticket-row"><span class="ticket-label">Route</span><span>${bk.source} → ${bk.destination}</span></div>
+        <div class="ticket-row"><span class="ticket-label">Journey Date</span><span>${bk.journey_date}</span></div>
+        <div class="ticket-row"><span class="ticket-label">Class</span><span><span class="badge badge-amber">${bk.seat_class}</span></span></div>
+        <div class="ticket-row"><span class="ticket-label">Passengers</span><span>${bk.passengers.length}</span></div>
+        <div class="ticket-row"><span class="ticket-label">Amount Paid</span><span class="accent bold">${fmtMoney(bk.fare)}</span></div>
+        <div class="ticket-row"><span class="ticket-label">Payment Mode</span><span>${bk.payment.mode}</span></div>
+        <div class="ticket-row"><span class="ticket-label">Transaction ID</span><span style="font-size:12px;color:var(--sub);">${bk.payment.transaction_id}</span></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="btn btn-success" onclick="switchPage('bookings')">View My Bookings</button>
+        <button class="btn btn-ghost" onclick="switchPage('search')">Search Again</button>
+      </div>
+    </div>`;
+}
+
+// ── My Bookings ────────────────────────────────────────────────
+async function loadMyBookings(){
+  if(!_state.currentUser){ document.getElementById("myBookingsList").innerHTML=`<div class="empty">Please <a href="#" onclick="switchPage('auth')" style="color:var(--accent)">login</a> to view bookings.</div>`; return; }
+  const div = document.getElementById("myBookingsList");
+  div.innerHTML = `<div class="empty"><div class="spinner"></div></div>`;
+  try {
+    const q = query(collection(db,"bookings"), where("user_id","==",_state.currentUser.uid));
+    const snap = await getDocs(q);
+    if(snap.empty){ div.innerHTML=`<div class="empty">No bookings found.</div>`; return; }
+    let html = "";
+    const bks = []; snap.forEach(d=>bks.push(d.data()));
+    bks.sort((a,b)=>b.created_at?.localeCompare(a.created_at));
+    bks.forEach(bk=>{
+      const badgeClass = bk.status==="CONFIRMED"?"badge-green":bk.status==="CANCELLED"?"badge-red":"badge-amber";
+      const paxChips   = bk.passengers.map(p=>`<span class="pax-chip">${p.name} • ${p.age}y • ${p.gender} • ${p.berth}</span>`).join("");
+      html += `<div class="booking-card">
+        <div class="bk-head">
+          <div>
+            <div class="bk-title">
+              <span class="badge ${badgeClass}">${bk.status}</span>
+              <span class="bold">${bk.train_name}</span>
+              <span style="color:var(--sub);font-size:12px;">#${bk.train_no}</span>
+            </div>
+            <div class="bk-meta">${bk.source} → ${bk.destination} &nbsp;|&nbsp; ${bk.journey_date} &nbsp;|&nbsp; ${bk.seat_class}</div>
+            <div class="bk-meta mt-8">PNR: <strong class="accent" style="letter-spacing:2px;">${bk.pnr}</strong></div>
+            ${bk.status==="CANCELLED"?`<div style="color:var(--red);font-size:12px;margin-top:4px;">Refund: ${fmtMoney(bk.refund_amount||0)} (75%)</div>`:""}
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:22px;font-weight:700;color:var(--accent);">${fmtMoney(bk.fare)}</div>
+            ${bk.status==="CONFIRMED"
+              ?`<button class="btn btn-danger btn-sm" style="margin-top:8px;" onclick="cancelBooking('${bk.booking_id}','${bk.train_no}','${bk.seat_class}',${bk.passengers.length},${bk.fare})">Cancel</button>`:""}
+          </div>
+        </div>
+        <div class="pax-chips">${paxChips}</div>
+      </div>`;
+    });
+    div.innerHTML = html;
+  } catch(e){ div.innerHTML=`<div class="empty">Error: ${e.message}</div>`; }
+}
+
+window.cancelBooking = async (bkId, trainNo, cls, paxCount, fare) => {
+  if(!confirm("Cancel this booking? 75% refund will be issued.")) return;
+  const refund = Math.round(fare * 0.75);
+  try {
+    await updateDoc(doc(db,"bookings",bkId), { status:"CANCELLED", refund_amount:refund, cancelled_at:new Date().toISOString() });
+    // Restore seats
+    const snap = await getDoc(doc(db,"trains",trainNo));
+    const avail = snap.data()?.available || {};
+    avail[cls] = (avail[cls]??0)+paxCount;
+    await updateDoc(doc(db,"trains",trainNo), { available: avail });
+    toast(`Booking cancelled. Refund of ${fmtMoney(refund)} initiated.`);
+    loadMyBookings();
+  } catch(e){ toast("Error: "+e.message,"error"); }
+};
+
+// ── PNR Status ──────────────────────────────────────────────────
+window.checkPNR = async () => {
+  const pnr = document.getElementById("pnrInput").value.trim();
+  const div = document.getElementById("pnrResult");
+  if(!pnr){ toast("Enter a PNR number.","error"); return; }
+  div.innerHTML = `<div class="empty"><div class="spinner"></div></div>`;
+  try {
+    const q = query(collection(db,"bookings"), where("pnr","==",pnr));
+    const snap = await getDocs(q);
+    if(snap.empty){ div.innerHTML=`<div class="card"><div class="empty" style="color:var(--red);">PNR not found. Check the number and try again.</div></div>`; return; }
+    const bk = snap.docs[0].data();
+    const badgeClass = bk.status==="CONFIRMED"?"badge-green":bk.status==="CANCELLED"?"badge-red":"badge-amber";
+    const paxRows = bk.passengers.map((p,i)=>`
+      <div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:6px;padding:8px 14px;font-size:12px;margin-bottom:6px;">
+        <span>${i+1}. ${p.name}</span>
+        <span style="color:var(--sub);">${p.age}y • ${p.gender} • ${p.berth}</span>
+      </div>`).join("");
+    div.innerHTML = `<div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <span class="badge ${badgeClass}">${bk.status}</span>
+        <span class="accent bold" style="font-size:22px;letter-spacing:3px;">${bk.pnr}</span>
+      </div>
+      <div class="info-grid">
+        ${[["Train",`${bk.train_name} (${bk.train_no})`],["Route",`${bk.source} → ${bk.destination}`],
+          ["Journey Date",bk.journey_date],["Class",bk.seat_class],
+          ["Passengers",bk.passengers.length],["Fare Paid",fmtMoney(bk.fare)]
+        ].map(([k,v])=>`<div class="info-cell"><div class="info-key">${k}</div><div class="info-val">${v}</div></div>`).join("")}
+      </div>
+      <hr class="divider"/>
+      <div style="font-size:11px;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Passenger List</div>
+      ${paxRows}
+    </div>`;
+  } catch(e){ div.innerHTML=`<div class="empty">Error: ${e.message}</div>`; }
+};
+
+// ── Admin ────────────────────────────────────────────────────────
+async function loadAdmin(){
+  const div = document.getElementById("adminContent");
+  div.innerHTML = `<div class="empty"><div class="spinner"></div></div>`;
+  try {
+    const [bkSnap, trSnap] = await Promise.all([getDocs(collection(db,"bookings")), getDocs(collection(db,"trains"))]);
+    const bookings = []; bkSnap.forEach(d=>bookings.push(d.data()));
+    const trains   = []; trSnap.forEach(d=>trains.push(d.data()));
+
+    const confirmed = bookings.filter(b=>b.status==="CONFIRMED");
+    const revenue   = confirmed.reduce((s,b)=>s+b.fare,0);
+    const cancelled = bookings.filter(b=>b.status==="CANCELLED").length;
+
+    const statsHtml = `
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-num" style="color:var(--green);">${confirmed.length}</div><div class="stat-label">Confirmed Bookings</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-num" style="color:var(--accent);">${fmtMoney(revenue)}</div><div class="stat-label">Total Revenue</div></div>
+        <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-num" style="color:var(--red);">${cancelled}</div><div class="stat-label">Cancellations</div></div>
+      </div>`;
+
+    let trainRows = trains.map(t=>{
+      const clsCells = CLASSES.map(c=>{
+        const total = (t.seats||{})[c]??0; if(!total) return "";
+        const avail = (t.available||{})[c]??0;
+        const pct   = Math.round((avail/total)*100);
+        const barColor = pct>50?"var(--green)":pct>20?"var(--accent)":"var(--red)";
+        return `<div style="flex:1;min-width:70px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+          <div class="class-name">${c}</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px;">${avail}/${total}</div>
+          <div class="occ-bar-wrap"><div class="occ-bar" style="width:${pct}%;background:${barColor};"></div></div>
+        </div>`;
+      }).join("");
+      return `<div class="card" style="margin-bottom:10px;">
+        <div class="flex-between" style="margin-bottom:10px;">
+          <div><span class="bold">${t.train_name}</span> <span style="color:var(--sub);font-size:12px;">#${t.train_no}</span></div>
+          <span style="font-size:13px;color:var(--sub);">${t.source} → ${t.destination}</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">${clsCells}</div>
+      </div>`;
+    }).join("");
+
+    // Recent bookings table
+    const recent = [...bookings].sort((a,b)=>(b.created_at||"").localeCompare(a.created_at||"")).slice(0,10);
+    const recentRows = recent.map(b=>`
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:10px 12px;font-size:12px;color:var(--accent);letter-spacing:1px;">${b.pnr}</td>
+        <td style="padding:10px 12px;font-size:13px;">${b.user_name}</td>
+        <td style="padding:10px 12px;font-size:12px;color:var(--sub);">${b.train_name}</td>
+        <td style="padding:10px 12px;font-size:12px;">${b.journey_date}</td>
+        <td style="padding:10px 12px;"><span class="badge ${b.status==="CONFIRMED"?"badge-green":b.status==="CANCELLED"?"badge-red":"badge-amber"}">${b.status}</span></td>
+        <td style="padding:10px 12px;font-size:13px;font-weight:600;color:var(--accent);">${fmtMoney(b.fare)}</td>
+      </tr>`).join("");
+
+    div.innerHTML = statsHtml +
+      `<h3 style="color:var(--text);margin-bottom:14px;">Train Occupancy</h3>` + trainRows +
+      `<h3 style="color:var(--text);margin:22px 0 14px;">Recent Bookings</h3>
+      <div class="card" style="overflow:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr style="border-bottom:2px solid var(--border);">
+            ${["PNR","Passenger","Train","Date","Status","Fare"].map(h=>`<th style="text-align:left;padding:10px 12px;font-size:11px;color:var(--sub);letter-spacing:1px;text-transform:uppercase;">${h}</th>`).join("")}
+          </tr></thead>
+          <tbody>${recentRows||`<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted);">No bookings yet.</td></tr>`}</tbody>
+        </table>
+      </div>`;
+  } catch(e){ div.innerHTML=`<div class="empty">Error loading admin data: ${e.message}</div>`; }
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+populateStations();
+seedTrainsIfNeeded();
+
+</script>
+</body>
+</html>

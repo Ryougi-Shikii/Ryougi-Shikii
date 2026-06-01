@@ -4,12 +4,11 @@ import uuid
 # ===================== Strong Classes =====================
 
 class User:
-    """Strong class representing a registered user."""
     def __init__(self, name: str, email: str, password: str, phone: str):
         self.user_id   = str(uuid.uuid4())
         self.name      = name
         self.email     = email
-        self._password = password   # stored as hash in production
+        self._password = password   # stored as hash for security
         self.phone     = phone
 
     def login(self, email: str, password: str) -> bool:
@@ -20,11 +19,10 @@ class User:
         if phone: self.phone = phone
 
     def __repr__(self):
-        return f"User({self.name}, {self.email})"
+        return f"User( name: {self.name}, email: {self.email} )"
 
 
 class Train:
-    # Strong class representing a train.
     def __init__(self, train_no: str, train_name: str, 
                  source: str, destination: str, total_seats: int):
         self.train_no    = train_no
@@ -40,24 +38,12 @@ class Train:
                    and s.status == "AVAILABLE")
 
     def __repr__(self):
-        return f"Train({self.train_no} - {self.train_name})"
-
-
-class Station:
-    # Strong class representing a railway station.
-    def __init__(self, code: str, name: str, city: str):
-        self.station_code = code
-        self.station_name = name
-        self.city         = city
-
-    def __repr__(self):
-        return f"Station({self.station_code} - {self.station_name})"
+        return f"Train( number: {self.train_no} - name: {self.train_name} )"
 
 
 # ===================== Weak Classes =====================
 
 class Seat:
-    # Weak class — existence depends on Train.
     def __init__(self, seat_no: str, class_type: str, train: Train):
         self.seat_id    = str(uuid.uuid4())
         self.seat_no    = seat_no
@@ -74,11 +60,10 @@ class Seat:
         self.status = "AVAILABLE"
 
     def __repr__(self):
-        return f"Seat({self.seat_no}, {self.class_type}, {self.status})"
+        return f"Seat( number: {self.seat_no}, type: {self.class_type}, status: {self.status} )"
 
 
 class Passenger:
-    """Weak class — existence depends on Booking."""
     def __init__(self, name: str, age: int, 
                  gender: str, berth_pref: str):
         self.passenger_id = str(uuid.uuid4())
@@ -92,7 +77,6 @@ class Passenger:
 
 
 class Payment:
-    """Weak class — existence depends on Booking."""
     def __init__(self, amount: float, mode: str, booking):
         self.payment_id     = str(uuid.uuid4())
         self.amount         = amount
@@ -108,11 +92,10 @@ class Payment:
         return True
 
     def __repr__(self):
-        return f"Payment({self.payment_id}, {self.amount}, {self.status})"
+        return f"Payment( id: {self.payment_id}, amount: {self.amount}, status: {self.status} )"
 
 
 class Booking:
-    """Weak class — existence depends on User and Train."""
     def __init__(self, user: User, train: Train, 
                  journey_date: str, seat_class: str):
         self.booking_id   = str(uuid.uuid4())
@@ -138,11 +121,10 @@ class Booking:
         return Cancellation(self)
 
     def __repr__(self):
-        return f"Booking({self.booking_id}, PNR={self.pnr}, {self.status})"
+        return f"Booking( id: {self.booking_id}, PNR: {self.pnr}, status: {self.status} )"
 
 
 class Ticket:
-    """Weak class — existence depends on Booking."""
     def __init__(self, booking: Booking):
         self.ticket_id = str(uuid.uuid4())
         self.pnr       = booking.pnr
@@ -155,11 +137,10 @@ class Ticket:
         return f"E-Ticket PDF for PNR {self.pnr} generated successfully."
 
     def __repr__(self):
-        return f"Ticket(PNR={self.pnr})"
+        return f"Ticket( PNR: {self.pnr} )"
 
 
 class Cancellation:
-    """Weak class — existence depends on Booking."""
     def __init__(self, booking: Booking):
         self.cancel_id    = str(uuid.uuid4())
         self.cancel_date  = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -175,10 +156,8 @@ class Cancellation:
         return f"Cancellation({self.cancel_id}, Refund=Rs.{self.refund_amount})"
 
 
-# ===================== Demo Execution =====================
-
 if __name__ == "__main__":
-    # 1. Create strong objects
+    # 1. Create objects
     user  = User("Sumit Kumar", "sumit@email.com", "pass1234", "8447530991")
     train = Train("12345", "Rajdhani Express", "Delhi", "Mumbai", 500)
     seat  = Seat("S1-L1", "3AC", train)

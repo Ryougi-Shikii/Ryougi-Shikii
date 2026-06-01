@@ -1,0 +1,226 @@
+
+<style>
+  :root { --slide-gap: 2.5rem; }
+  .slide { margin: 0 0 var(--slide-gap); border-left: 3px solid var(--color-border-secondary); padding: 0 0 0 1.25rem; }
+  .slide-label { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-tertiary); margin: 0 0 4px; }
+  .slide-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 .6rem; }
+  .slide-time { display: inline-block; font-size: 11px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 4px; padding: 2px 8px; color: var(--color-text-secondary); margin: 0 0 .75rem; }
+  .script { font-size: 15px; line-height: 1.75; color: var(--color-text-primary); }
+  .script p { margin: 0 0 .75rem; }
+  .callout { background: var(--color-background-secondary); border-left: 2px solid var(--color-border-info); border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: .6rem 1rem; margin: .75rem 0; font-size: 14px; color: var(--color-text-secondary); font-style: italic; }
+  .aside { font-size: 13px; color: var(--color-text-tertiary); padding: .4rem .75rem; border: 0.5px dashed var(--color-border-secondary); border-radius: var(--border-radius-md); margin: .5rem 0; }
+  .speaker-note { display: flex; gap: 8px; align-items: flex-start; margin: .5rem 0; }
+  .speaker-note .icon { font-size: 14px; margin-top: 2px; flex-shrink: 0; }
+  .speaker-note p { margin: 0; font-size: 13px; color: var(--color-text-secondary); }
+  .toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 8px; margin: .75rem 0; }
+  .toc-item { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: .5rem .75rem; font-size: 13px; color: var(--color-text-secondary); }
+  .toc-num { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); display: block; margin-bottom: 2px; }
+  .metric-row { display: flex; gap: 10px; margin: .75rem 0; }
+  .metric { flex: 1; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: .6rem .75rem; text-align: center; }
+  .metric .val { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+  .metric .lbl { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 2rem 0; }
+  h2 { font-size: 22px; font-weight: 500; margin: 0 0 1.5rem; color: var(--color-text-primary); }
+  .progress { display: flex; gap: 4px; margin: 0 0 2rem; }
+  .progress span { height: 3px; border-radius: 2px; background: var(--color-border-secondary); flex: 1; }
+  .progress span.done { background: var(--color-text-info); }
+</style>
+
+<h2>RITformer — 20-minute presentation script</h2>
+
+<div class="progress">
+  <span class="done"></span><span class="done"></span><span class="done"></span>
+  <span class="done"></span><span class="done"></span><span class="done"></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<div class="slide">
+  <div class="slide-label">Slide 1 — Hook &amp; title</div>
+  <div class="slide-title">Opening — the problem you've seen a thousand times</div>
+  <div class="slide-time">0:00 – 1:30</div>
+  <div class="script">
+    <p>"Take out your phone right now. Go to your camera. Walk into a dim corner of this room and take a photo."</p>
+    <p>"What do you get? Noise. Muddy colors. Blurry edges. Your phone's chipset is doing everything it can, but it's fighting physics — there just aren't enough photons hitting the sensor."</p>
+    <p>"This isn't a phone problem. It's the same problem in hospital imaging rooms, in the cameras watching highways at 2 AM, in the lidar rigs on self-driving cars going under a bridge. When light is scarce, every vision system we have starts to fail."</p>
+    <p>"Today I'm going to show you a model we built — RITformer — that attacks this problem by doing something we think is novel: it teaches a Transformer to be scared of its own brightness."</p>
+  </div>
+  <div class="callout">Pause here. Let the room absorb the phrase "scared of its own brightness." That's your hook — it maps to the α mechanism you'll explain in 8 minutes.</div>
+</div>
+
+<div class="slide">
+  <div class="slide-label">Slide 2 — Roadmap</div>
+  <div class="slide-title">What we're covering in 20 minutes</div>
+  <div class="slide-time">1:30 – 2:00</div>
+  <div class="toc-grid">
+    <div class="toc-item"><span class="toc-num">01 — 2 min</span>Why this is hard</div>
+    <div class="toc-item"><span class="toc-num">02 — 3 min</span>What everyone else tried</div>
+    <div class="toc-item"><span class="toc-num">03 — 6 min</span>How RITformer works</div>
+    <div class="toc-item"><span class="toc-num">04 — 4 min</span>Results &amp; ablations</div>
+    <div class="toc-item"><span class="toc-num">05 — 3 min</span>Qualitative analysis</div>
+    <div class="toc-item"><span class="toc-num">06 — 2 min</span>Where we go next</div>
+  </div>
+  <div class="script">
+    <p>"Six sections. I'll keep a clock in the corner of my head. Questions at the end — but if you see something wrong, shout."</p>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="slide">
+  <div class="slide-label">Slide 3 — Problem statement</div>
+  <div class="slide-title">Why dark images are genuinely hard to fix</div>
+  <div class="slide-time">2:00 – 4:00</div>
+  <div class="script">
+    <p>"Here's the fundamental physics. A camera sensor counts photons. In bright light, each pixel accumulates thousands of counts and the signal-to-noise ratio is excellent. In the dark, you're counting dozens of photons — and the random fluctuation in that count is a large fraction of the signal itself. That's shot noise, and it's not a software bug. It's quantum mechanics."</p>
+    <p>"To compensate, cameras crank up analogue gain — ISO. But gain amplifies noise along with signal. You also get color channel imbalance because sensors aren't equally sensitive across wavelengths at low light. And if the scene has both a lit window and a dark corner, no single global correction fixes both."</p>
+    <p>"The result is five simultaneous degradations: underexposure, amplified noise, contrast collapse, color distortion, and loss of fine structure. Fix one naively and you often make another worse. Brighten everything — noise explodes. Suppress noise — edges smear. That's the fundamental tension this paper is about."</p>
+  </div>
+  <div class="callout">Think of it like trying to fix a blurry, underexposed photo by guessing what the original scene looked like — except you have to do it differently for the bright spots than the dark spots, all at the same time.</div>
+</div>
+
+<hr class="divider">
+
+<div class="slide">
+  <div class="slide-label">Slide 4 — Related work part 1</div>
+  <div class="slide-title">The classical toolkit — fast but brittle</div>
+  <div class="slide-time">4:00 – 5:30</div>
+  <div class="script">
+    <p>"The field spent decades on signal-processing approaches. Histogram Equalization — HE — asks: what if we redistributed the brightness values so every level appears equally often? Fast. Simple. Runs in under a millisecond. But it treats the whole image as one flat pool. A face in a dark room and a streetlight behind it get the same treatment, and the result is washed-out, over-enhanced garbage."</p>
+    <p>"CLAHE — which Pizer introduced in 1987 — fixes this by doing HE locally in tiles. Better. Still gets tile-boundary artefacts. Still can't recover detail that the sensor literally didn't capture."</p>
+    <p>"Gamma correction applies a power-law curve to intensities. One-line implementation. Works surprisingly well on uniformly underexposed images. Fails the moment you have mixed lighting — which is every real scene."</p>
+    <p>"And then there's Retinex — Land's 1977 theory of human colour perception. The key insight: your eye separates how bright something is from what color it actually is. Mathematically, the image I equals reflectance R times illumination L, element-wise. If you can estimate L, you can divide it out and get clean R. Elegant theory. The problem is estimating L. Classical solvers use spatial smoothness priors — they assume illumination changes slowly. It doesn't. A lamp casts a hard shadow. And the residual noise ends up amplified in R."</p>
+  </div>
+  <div class="aside">Key table: CLAHE gets 17.10 PSNR, classical Retinex gets 16.63. Both under 17.2 dB. We need to do much better.</div>
+</div>
+
+<div class="slide">
+  <div class="slide-label">Slide 5 — Related work part 2</div>
+  <div class="slide-title">The deep learning era — and where Transformers enter</div>
+  <div class="slide-time">5:30 – 7:00</div>
+  <div class="script">
+    <p>"The first deep learning move was LLNet in 2017 — a stacked sparse autoencoder. It proved you could learn enhancement from data. 17.96 PSNR. Better than classical, but not dramatically."</p>
+    <p>"RetinexNet — Wei et al., 2018 — did something important: it embedded the Retinex decomposition inside a CNN and released the LOL benchmark dataset that the whole field now trains on. But the CNN still had trouble with globally varying illumination because CNNs have finite receptive fields. A 3×3 convolutional kernel can only see a tiny patch of the image at once."</p>
+    <p>"EnlightenGAN, Zero-DCE — clever training strategies, weaker metrics. URetinexNet and SNR-Aware pushed to 21 dB. Then Transformers arrived. Restormer hit 22.43. Retiformer — the closest prior work to ours — fused Retinex with Transformer window-attention and hit 22.80."</p>
+    <p>"So the trend is clear. Every time someone adds global attention to Retinex-based decomposition, numbers go up. Our question was: is there something more principled we can do with that attention signal? And the answer is yes — you can condition the attention on how dark each pixel actually is."</p>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="slide">
+  <div class="slide-label">Slide 6 — Architecture overview</div>
+  <div class="slide-title">RITformer — the big picture in 30 seconds</div>
+  <div class="slide-time">7:00 – 8:00</div>
+  <div class="script">
+    <p>"Here's the headline before I go into the details. RITformer is a four-step pipeline. Step one: split the dark image into two layers — the illumination map and the reflectance map. Step two: estimate, for every pixel, how aggressively we need to brighten it. That estimate is a number we call α — the illumination factor. Step three: feed the illumination map into a Transformer that is literally modulated by α at every attention step. Step four: clean the reflectance, then multiply it back with the enhanced illumination."</p>
+    <p>"The whole model is a U-Net shaped encoder-decoder with Swin Transformer blocks, about 18.4 million parameters — smaller than most comparable restorers."</p>
+  </div>
+  <div class="callout">If you explain nothing else, explain this: α is a map that tells each pixel "how much do you need to be fixed?" Dark pixels get high α. Already-bright pixels get α near zero. The Transformer then pays more attention in dark regions and almost ignores bright ones. That's the whole idea.</div>
+</div>
+
+<div class="slide">
+  <div class="slide-label">Slide 7 — RDN deep-dive</div>
+  <div class="slide-title">Step 1: Retinex decomposition network</div>
+  <div class="slide-time">8:00 – 9:30</div>
+  <div class="script">
+    <p>"The Retinex Decomposition Network — RDN — takes the low-light image and produces two outputs: R-hat, the reflectance, and L-hat, the illumination map."</p>
+    <p>"It's a lightweight encoder: depthwise separable convolutions, instance normalization. Fast and parameter-efficient. The loss it minimizes has two terms. First, the reconstruction loss — R-hat times L-hat should reproduce the input image. Second, a spatial gradient smoothness penalty on L-hat — we want the illumination to vary slowly and smoothly, not jump around pixel by pixel."</p>
+    <p>"In plain terms: RDN is answering the question 'which parts of this image are dark because the scene is dim, and which parts are dark because the object itself is dark?' A black cat in a bright room should have a bright illumination map and a dark reflectance. The same black cat in a dim room should have a dim illumination map and still a dark reflectance. Getting this decomposition right is foundational — every downstream step depends on it."</p>
+  </div>
+</div>
+
+<div class="slide">
+  <div class="slide-label">Slide 8 — IFE deep-dive</div>
+  <div class="slide-title">Step 2: the illumination factor estimator — the core innovation</div>
+  <div class="slide-time">9:30 – 11:30</div>
+  <div class="script">
+    <p>"This is the part I want you to really lock onto. Most enhancement models treat illumination correction as a uniform operation — brighten everything according to some learned rule. The problem is that a scene almost never has uniform darkness. You have a face in a shadow, a window in the background, a lamp in the corner."</p>
+    <p>"IFE takes L-hat and produces α — a spatial field, same height and width as the image, where every pixel has a value between 0 and 1. Low α: 'this pixel is already bright enough, don't do much.' High α: 'this pixel is in the dark, enhance aggressively.'"</p>
+    <p>"It's a three-layer depthwise separable convolutional network with a sigmoid output. Tiny. Fast. But it produces the control signal that drives everything downstream."</p>
+    <p>"Think of it like a dimmer switch for every single pixel independently. Your bedroom has a dimmer — you can make the room uniformly brighter. IFE gives every pixel its own dimmer, set exactly as bright as it needs to be and no brighter. That's how we prevent over-brightening highlights while recovering severely dark areas."</p>
+  </div>
+  <div class="aside">Ablation result: removing α drops PSNR by 2.3 dB — the single largest contribution of any component.</div>
+</div>
+
+<div class="slide">
+  <div class="slide-label">Slide 9 — IGTE deep-dive</div>
+  <div class="slide-title">Step 3: illumination-guided Transformer enhancer</div>
+  <div class="slide-time">11:30 – 13:30</div>
+  <div class="script">
+    <p>"Now we get to the Transformer. The IGTE tokenizes L-hat into 8×8 patches, projects them to 256 dimensions, and passes them through 6 Illumination-Guided Self-Attention blocks — IGSA."</p>
+    <p>"The key modification to standard self-attention is this. In a normal Transformer, the query vector Q is compared to every key K to produce attention weights. In IGSA, we scale each query by its corresponding α value before that comparison. The equation is: IGSA equals softmax of α times Q times K-transpose over root-dk, times V."</p>
+    <p>"What does that do? In dark regions, α is large. Scaling Q up makes the dot product with K larger, which means after softmax the attention weights spread more broadly across the image. The model is looking far and wide for context in dark areas — trying to understand the global illumination structure. In bright areas, α is small, the attention stays local and focused. The model is saying 'I know what's happening here, I don't need to look far.'"</p>
+    <p>"After the Transformer, the enhanced illumination L-hat-star is the original plus the Transformer correction. Clean, residual formulation — if the Transformer learned nothing, the output is still the original illumination map. The network can only add, not corrupt."</p>
+  </div>
+  <div class="callout">Imagine a security guard watching a camera feed. In well-lit areas they glance around calmly. In dark areas they lean forward and scan the whole frame intensely. α is the guard's alertness dial. That's IGSA.</div>
+</div>
+
+<div class="slide">
+  <div class="slide-label">Slide 10 — Reflectance refiner</div>
+  <div class="slide-title">Step 4: cleaning the reflectance and rebuilding the image</div>
+  <div class="slide-time">13:30 – 14:30</div>
+  <div class="script">
+    <p>"Remember that decomposition amplifies noise in the reflectance layer. The Reflectance Refiner is a three-level U-Net with residual connections that denoises R-hat — suppressing sensor noise without blurring texture."</p>
+    <p>"Final reconstruction is simply R-hat-star element-wise multiplied by L-hat-star. We also have a global residual from input to output to ease gradient flow during training."</p>
+    <p>"The composite training loss has four terms: Charbonnier pixel loss for reconstruction fidelity, VGG-19 perceptual loss for natural appearance, multi-scale SSIM for structural preservation, and an illumination consistency loss that penalizes the estimated illumination map for being physically implausible. Weights are 1.0, 0.1, 0.2, and 0.15 respectively — empirically tuned."</p>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="slide">
+  <div class="slide-label">Slide 11 — Quantitative results</div>
+  <div class="slide-title">The numbers — LOL benchmark, 15 test pairs</div>
+  <div class="slide-time">14:30 – 16:30</div>
+  <div class="metric-row">
+    <div class="metric"><div class="val">∼23.6 dB</div><div class="lbl">RITformer PSNR</div></div>
+    <div class="metric"><div class="val">∼0.872</div><div class="lbl">RITformer SSIM</div></div>
+    <div class="metric"><div class="val">+6.5 dB</div><div class="lbl">vs. best classical</div></div>
+    <div class="metric"><div class="val">+0.8 dB</div><div class="lbl">vs. Retiformer</div></div>
+  </div>
+  <div class="script">
+    <p>"Let me walk you through the leaderboard. At the bottom: Histogram Equalization at 15.21 dB. Gamma correction at 16.84. CLAHE — the strongest classical method — at 17.10. Classical Retinex at 16.63. All below 17.2."</p>
+    <p>"First serious CNN: KinD at 20.87. URetinexNet 21.32. SNR-Aware 21.48. Restormer — pure Transformer — 22.43. Retiformer — the prior Retinex plus Transformer work — 22.80."</p>
+    <p>"RITformer: approximately 23.6 dB PSNR and 0.872 SSIM. The improvement over CLAHE is 6.5 dB — and I want to put that in perspective. A 6 dB improvement in PSNR corresponds to roughly a 4× reduction in mean squared error. The Wilcoxon signed-rank test over the 15 test pairs gives p less than 0.001."</p>
+    <p>"And crucially — 48 milliseconds inference time. Faster than Retiformer at 55 ms, dramatically faster than Restormer at 90 ms. Better results, fewer parameters, faster. That's the engineering win."</p>
+  </div>
+</div>
+
+<div class="slide">
+  <div class="slide-label">Slide 12 — Ablation study</div>
+  <div class="slide-title">What's actually doing the work?</div>
+  <div class="slide-time">16:30 – 17:30</div>
+  <div class="script">
+    <p>"We ran an ablation to isolate each component. Remove α — revert to unguided Transformer attention — and PSNR drops 2.3 dB. That is the largest single contribution of any component in the model. The illumination factor is not a minor tweak; it is the central mechanism."</p>
+    <p>"Remove the Transformer entirely and replace with a CNN illumination enhancer: minus 1.8 dB. This confirms that global attention for illumination estimation is genuinely valuable — a CNN with its limited receptive field can't capture the relationship between a dark foreground and a bright background window across the whole image."</p>
+    <p>"Remove the reflectance refinement U-Net: minus 1.5 dB. Remove the illumination consistency loss: minus 0.5 dB. The full model requires all four components — but α is where you should focus if you're thinking about follow-up work."</p>
+  </div>
+</div>
+
+<div class="slide">
+  <div class="slide-label">Slide 13 — Qualitative &amp; generalisation</div>
+  <div class="slide-title">What does it actually look like? And does it transfer?</div>
+  <div class="slide-time">17:30 – 18:30</div>
+  <div class="script">
+    <p>"CLAHE's failure mode is tile-boundary blocking — you can see the grid if you look. Classical Retinex produces halo artefacts at bright edges because its illumination estimate doesn't perfectly track scene boundaries. Gamma correction desaturates colors on mixed-illumination scenes."</p>
+    <p>"RITformer eliminates all three. No halos — because the smoothness prior on the illumination map is learned, not fixed. No tile artefacts — there are no tiles. No desaturation — the reflectance pathway preserves colour while the Transformer handles brightness."</p>
+    <p>"On ExDark generalisation — 100 images across 12 object categories, no paired reference, evaluated by NIQE — RITformer achieves the lowest score in 10 of 12 categories. The two weak spots are candlelight scenes. Makes sense: LOL doesn't have much candlelight training data, and extreme spectral imbalance from a single compact warm source is genuinely out-of-distribution. We have preliminary results showing domain-adaptive fine-tuning on a small candlelight subset closes most of that gap."</p>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="slide">
+  <div class="slide-label">Slide 14 — Future work &amp; close</div>
+  <div class="slide-title">Where RITformer goes next</div>
+  <div class="slide-time">18:30 – 20:00</div>
+  <div class="script">
+    <p>"Four directions we're most excited about. First — richer conditioning. Right now α is a scalar field. What if we conditioned it on scene semantics? A face needs different enhancement treatment than a road sign. An illumination embedding that knows what's in the scene could unlock another level of adaptivity."</p>
+    <p>"Second — diffusion sampling for perceptual diversity. PSNR-optimal outputs converge toward pixel-level averages. Diffusion priors could let us sample plausible high-frequency texture instead. This is particularly relevant for surveillance applications where you want the sharpest plausible reconstruction."</p>
+    <p>"Third — mobile deployment. 18.4 million parameters is already lean. A knowledge-distilled variant targeting smartphone NPUs is straightforward and immediately commercially relevant."</p>
+    <p>"Fourth — training data. The LOL v1 benchmark has 485 training pairs. That's tiny. Building or licensing paired training sets that cover autonomous driving night scenarios and clinical low-dose imaging would dramatically broaden deployment."</p>
+    <p>"To close: the core contribution here is simple. We asked 'can we teach a Transformer to know where it needs to work hardest and scale its attention accordingly?' The answer is yes, and α is the mechanism. 23.6 dB, 18.4 million parameters, 48 milliseconds. Thank you."</p>
+  </div>
+  <div class="callout">End on the one-sentence summary: "We gave every pixel its own brightness dial, and taught a Transformer to read it." That's RITformer.</div>
+  <div class="speaker-note"><span class="icon">💡</span><p>Save 2 minutes for questions. Anticipate: "why not test on SID?" (RAW sensor domain mismatch), "why LOL v1 and not v2?" (comparability to prior work), and "what's your inference hardware target?" (RTX 3090 in paper, NPU distillation in future work).</p></div>
+</div>

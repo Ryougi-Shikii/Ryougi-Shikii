@@ -56,7 +56,19 @@ Deel Learning aside, I am also interested in Linus, Bash Scripting and Docker.
 - **LinkedIn:** [Sumit Kumar](https://www.linkedin.com/in/sumit-kumar-863b94254/)
 
 ---
-
+<!---
+ "I’m a Computer Science student and Deep Learning developer with a specific focus on Computer Vision and Transformer architectures.                                                     
+                                                                                                                                                                                          
+  What defines my approach to AI is a commitment to understanding the 'why' behind the models. For example, instead of just using high-level libraries, I implemented the 'Attention Is   
+  All You Need' paper from scratch in PyTorch. This wasn't just an academic exercise—it allowed me to deep-dive into the gradients and successfully diagnose complex training collapses   
+  by tracing them back to learning rate warmup misconfigurations.                                                                                                                         
+                                                                                                                                                                                          
+  My most significant work to date is a project called RITformer. I proposed and implemented a novel architecture for low-light image enhancement that fuses classical Retinex theory     
+  with modern Transformers. By introducing an Illumination-Guided Attention mechanism, I was able to achieve a PSNR of 23.6 dB on the LOL benchmark, outperforming several established    
+  baselines.                                                                                                                                                                               
+  Ultimately, I’m someone who loves bridging the gap between physics-based theory and state-of-the-art AI, and I’m looking for a role where I can apply this level of architectural depth 
+  to solve real-world vision challenges."
+  --->
 <!---
 Ryougi-Shikii/Ryougi-Shikii is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 You can click the Preview link to take a look at your changes.
